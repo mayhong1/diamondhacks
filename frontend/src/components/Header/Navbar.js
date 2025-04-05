@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
 
 export default function Navbar() {
   return (
@@ -9,14 +10,17 @@ export default function Navbar() {
             DiamondHacks2025
           </Link>
           <div className="navbar-links">
-            <Link href="/github" className="navbar-link">
+            <Link
+              href="https://github.com/mayhong1/diamondhacks"
+              className={buttonVariants({ variant: "outline" })}
+            >
               GitHub
             </Link>
-            <Link href="/about" className="navbar-link">
+            <Link
+              href="/about"
+              className={buttonVariants({ variant: "outline" })}
+            >
               About
-            </Link>
-            <Link href="/signin" className="navbar-link">
-              Sign In
             </Link>
           </div>
         </div>
