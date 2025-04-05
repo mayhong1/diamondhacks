@@ -9,11 +9,11 @@ export default function Navbar() {
             DiamondHacks2025
           </Link>
           <div className="navbar-links">
-            <Link href="/vote" className="navbar-link">
-              Vote
+            <Link href="/github" className="navbar-link">
+              GitHub
             </Link>
-            <Link href="/leaderboard" className="navbar-link">
-              Leaderboard
+            <Link href="/about" className="navbar-link">
+              About
             </Link>
             <Link href="/signin" className="navbar-link">
               Sign In
