@@ -1,9 +1,9 @@
 import argparse
 import params
 from pymongo import MongoClient
-from langchain.vectorstores import MongoDBAtlasVectorSearch
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.llms import OpenAI
+from langchain_mongodb import MongoDBAtlasVectorSearch
+from langchain_openai import OpenAIEmbeddings
+from langchain_openai import OpenAI
 from langchain.retrievers import ContextualCompressionRetriever
 from langchain.retrievers.document_compressors import LLMChainExtractor
 import warnings
@@ -64,6 +64,6 @@ compression_retriever = ContextualCompressionRetriever(
 
 print("\nAI Response:")
 print("-----------")
-compressed_docs = compression_retriever.get_relevant_documents(query)
+compressed_docs = compression_retriever.invoke(query)
 print(compressed_docs[0].metadata['title'])
 print(compressed_docs[0].page_content)
