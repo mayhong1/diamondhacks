@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import SearchResults from "./SearchResults";
 
 export default function SearchBar() {
   const [searchQuery, setSearchQuery] = useState("");
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [showResults, setShowResults] = useState(false);
 
   const placeholderTexts = [
     "What would be a good gift for my 15 year old cousin?",
@@ -37,54 +39,70 @@ export default function SearchBar() {
     e.preventDefault();
     // Here you can handle the search query
     console.log("Search query:", searchQuery);
-    // TODO: Add your search logic here
+    // Show results when search is performed
+    setShowResults(true);
+    // Scroll down slightly to show results are available
+    setTimeout(() => {
+      window.scrollTo({
+        top: window.innerHeight * 0.3,
+        behavior: "smooth",
+      });
+    }, 100);
   };
 
   return (
-    <div className="search-container">
-      <h1 className="search-title">Let's find your next purchase.</h1>
-      <form onSubmit={handleSearch} className="search-box-container">
-        <div className="search-box">
-          <input
-            type="text"
-            className={`search-input ${
-              isTransitioning ? "placeholder-fade-out" : "placeholder-fade-in"
-            }`}
-            placeholder={placeholderTexts[placeholderIndex]}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <button type="submit" className="search-button">
-            <svg
-              className="search-icon"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          </button>
+    <>
+      <div className={`search-container ${showResults ? "with-results" : ""}`}>
+        <h1 className="search-title">Let's find your next purchase.</h1>
+        <form onSubmit={handleSearch} className="search-box-container">
+          <div className="search-box">
+            <input
+              type="text"
+              className={`search-input ${
+                isTransitioning ? "placeholder-fade-out" : "placeholder-fade-in"
+              }`}
+              placeholder={placeholderTexts[placeholderIndex]}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <button type="submit" className="search-button">
+              <svg
+                className="search-icon"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </button>
+          </div>
+        </form>
+
+        <style jsx>{`
+          .search-input {
+            transition: opacity 1s ease;
+          }
+
+          .placeholder-fade-out {
+            opacity: 0.3;
+          }
+
+          .placeholder-fade-in {
+            opacity: 1;
+          }
+        `}</style>
+      </div>
+
+      {showResults && (
+        <div className="results-section">
+          <SearchResults query={searchQuery} />
         </div>
-      </form>
-
-      <style jsx>{`
-        .search-input {
-          transition: opacity 1s ease;
-        }
-
-        .placeholder-fade-out {
-          opacity: 0.3;
-        }
-
-        .placeholder-fade-in {
-          opacity: 1;
-        }
-      `}</style>
-    </div>
+      )}
+    </>
   );
 }

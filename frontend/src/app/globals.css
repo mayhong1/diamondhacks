@@ -129,6 +129,14 @@ body {
   flex-direction: column;
   justify-content: center;
   margin-top: -5rem; /* This will move the search bar up slightly from the center */
+  min-height: 60vh; /* Ensures search bar is centered when no results */
+}
+
+.search-container.with-results {
+  min-height: auto;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  justify-content: flex-start;
 }
 
 .search-title {
@@ -309,4 +317,37 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Search Results Styles */
+.results-section {
+  min-height: 90vh;
+  padding-top: 2rem;
+  background-color: #f9fafb;
+  border-top: 1px solid var(--border-color);
+}
+
+.search-results-container {
+  width: 100%;
+  max-width: 800px;
+  padding: 0 1rem;
+}
+
+.product-card {
+  width: 100%;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary-hover);
+}
+
+.product-card:hover .product-name {
+  color: var(--primary-color);
+}
+
+.results-header {
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 1rem;
 }
