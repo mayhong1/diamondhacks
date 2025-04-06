@@ -1,6 +1,37 @@
-flask
-flask-cors
+# Core Python packages
+argparse
+warnings
+
+# MongoDB and related
 pymongo
 langchain-mongodb
+
+# LangChain and OpenAI
 langchain-openai
 langchain-core
+
+# Flask and related
+flask
+flask-cors
+werkzeug
+
+# Data handling
+pandas
+csv
+re
+
+# Google Generative AI
+google-generativeai
+Pillow  # For PIL.Image
+
+# Additional
+logging
+io
+os
+time
+
+# Custom/local modules (not installable via pip)
+# These will need to be available locally
+# params.py
+# query_amazon.py
+# image_processor.py
