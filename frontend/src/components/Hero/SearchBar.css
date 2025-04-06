@@ -1,0 +1,301 @@
+/* SearchBar Component Styles */
+
+.search-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.search-title {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.search-box-container {
+  width: 100%;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 24px;
+  padding: 8px 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.search-input {
+  flex: 0.97;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  padding: 8px 0;
+  background: transparent;
+  margin-right: 8px;
+  transition: opacity 1s ease;
+  max-width: 80%;
+}
+
+.placeholder-fade-out {
+  opacity: 0.3;
+}
+
+.placeholder-fade-in {
+  opacity: 1;
+}
+
+.button-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.voice-button,
+.image-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: all 0.2s;
+  position: relative;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  margin-right: 4px;
+}
+
+.voice-button svg,
+.image-button svg {
+  width: 20px;
+  height: 20px;
+  z-index: 2;
+}
+
+.voice-button:hover,
+.image-button:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.voice-button.listening {
+  color: #e74c3c;
+  background-color: #fee7e5;
+}
+
+.voice-button:disabled,
+.image-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.listening-indicator {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: currentColor;
+  opacity: 0.1;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.search-button {
+  background: #007aff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  transition: background-color 0.2s;
+}
+
+.search-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.search-button:hover {
+  background: #0056b3;
+}
+
+.search-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.stop-icon {
+  position: relative;
+  z-index: 1;
+}
+
+.error-message {
+  margin-top: 20px;
+  color: #e74c3c;
+  text-align: center;
+}
+
+.image-preview-container {
+  margin-top: 16px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.image-preview {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.clear-image-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  transition: background-color 0.2s;
+}
+
+.clear-image-button:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.image-search-hint {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #666;
+  text-align: center;
+}
+
+.search-results {
+  margin-top: 40px;
+  width: 100%;
+  max-width: 800px;
+}
+
+.results-title {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.result-item {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.result-content {
+  margin-bottom: 12px;
+}
+
+.result-title {
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+.result-price {
+  color: #2ecc71;
+  font-weight: bold;
+}
+
+.result-rating {
+  color: #f39c12;
+}
+
+.result-detail {
+  margin-bottom: 4px;
+}
+
+.result-category {
+  font-style: italic;
+  color: #666;
+  margin-top: 8px;
+}
+
+.result-link {
+  margin-top: 8px;
+  text-align: right;
+}
+
+.product-link-button {
+  display: inline-block;
+  background: #007aff;
+  border: none;
+  cursor: pointer;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+.product-link-button:hover {
+  background-color: #0056b3;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.1;
+  }
+}
+
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -7,7 +7,7 @@ export default function Navbar() {
       <div className="navbar-container">
         <div className="navbar-content">
           <Link href="/" className="navbar-logo">
-            DiamondHacks2025
+            NotRedShirt
           </Link>
           <div className="navbar-links">
             <Link

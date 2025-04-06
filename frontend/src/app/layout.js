@@ -1,7 +1,7 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "DiamondHacks2025",
+  title: "NotRedShirt",
   description:
     "Made by Spencer Cowles, Markus Grundler, Daniel Bonkowsky, and May Hong",
 };
