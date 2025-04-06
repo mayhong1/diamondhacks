@@ -1,19 +1,16 @@
 import argparse
 import params
+import certifi
+import warnings
+from google import genai
 from pymongo import MongoClient
 from langchain_mongodb import MongoDBAtlasVectorSearch
 from langchain_openai import OpenAIEmbeddings
 from langchain_openai import OpenAI
-import warnings
+
 
 # Filter out warnings
 warnings.filterwarnings("ignore", category=UserWarning)
-
-# Category mapping
-CATEGORIES = {
-    104: "Suitcases",
-    110: "Men's Clothing"
-}
 
 def search_amazon(query, category=None):
     """
@@ -26,73 +23,87 @@ def search_amazon(query, category=None):
     Returns:
         list: List of search results with product information, category, and link
     """
+    # Query negation preprocessing
+    is_negated = False
+    negated_clause = ""
+    positive_search = ""
+
+    client = genai.Client(api_key=params.gemini_api_key)
+
+    is_negated_query = client.models.generate_content(
+        model="gemini-2.0-flash",
+        contents=[f"In the following phrase, Identify negation words: Find words \
+            like 'not,' 'un-,' 'in-,' 'non-,' 'without,' and similar terms. If \
+            there are any, respond yes. Otherwise, respond no.\
+            Phrase: {query}"]
+    )
+    is_negated = (is_negated_query.text.strip().casefold() == 'yes'.casefold())
+
+    if (is_negated):
+        negated_clause_query = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=[f"Extract the negated adjective from the following sentence: ‘{query}’. Return only the negated adjective (not including the negation word)."]
+        )
+        negated_clause = negated_clause_query.text
+
+        positive_search_query = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=[f"Please analyze the following phrase and perform these transformations:\
+                1. Identify negation words: Find words like 'not,' 'un-,' 'in-,' 'non-,' 'without,' and similar terms.\
+                2. Identify negated adjectives: Determine which adjectives are being negated by the identified negation words.\
+                3. Remove negation words and negated adjectives: Delete both the negation words and the adjectives they negate.\
+                4. Preserve other adjectives: Leave any adjectives that are not being negated intact.\
+                5. Respond with only the transformed phrase\
+                Phrase: {query}\
+            "]
+        )  
+        positive_search = positive_search_query.text
+
     # Initialize MongoDB python client
-    client = MongoClient(params.mongodb_conn_string)
+    client = MongoClient(params.mongodb_conn_string, tlsCAFile=certifi.where())
     collection = client[params.db_name][params.collection_name]
 
-    # initialize vector store
+    # Initialize vector store
     embeddings = OpenAIEmbeddings(openai_api_key=params.openai_api_key)
     vectorStore = MongoDBAtlasVectorSearch(
         collection, embeddings, index_name=params.index_name
     )
 
-    # Perform similarity search
-    docs = vectorStore.similarity_search(query, k=10)  # Get more results to allow for filtering
-
     # Process search results
     results = []
-    results_shown = 0
-    
-    for i, doc in enumerate(docs):
-        # If category filter is applied, check that the document matches in the text content
-        if category:
-            category_found = False
-            category_str = f"Category ID: {category}"
-            if category_str in doc.page_content:
-                category_found = True
-            
-            if not category_found:
-                continue
-        
-        # Extract category name if present
-        doc_category = None
-        link = None
-        title = None
-        
-        # Extract info from content
-        content_lines = doc.page_content.split('\n')
-        for line in content_lines:
-            if "Category ID: " in line:
-                try:
-                    category_id = int(line.split("Category ID: ")[1].strip())
-                    if category_id in CATEGORIES:
-                        doc_category = CATEGORIES[category_id]
-                except ValueError:
-                    pass
-            elif "Title:" in line:
-                title = line.split("Title:")[1].strip()
-            elif "Link:" in line:
-                link = line.split("productURL:")[1].strip()
-        
-        # Generate Amazon product search link if no link found but title exists
-       # if not link and title:
-            # Format title for Amazon search URL
-           # search_query = title.replace(" ", "+")
-           # link = f"https://www.amazon.com/s?k={search_query}"
-        
-        link = doc.metadata.get('productURL')
-        # Add result to list
-        results.append({
-            "content": doc.page_content,
-            "category_name": doc_category,
-            "link": link
-        })
-        
-        results_shown += 1
-        
-        # Stop after collecting 5 results
-        if results_shown >= 5:
-            break
+
+    if (not is_negated):
+        # Perform similarity search
+        docs = vectorStore.similarity_search(query, k=5)  # Get more results to allow for filtering
+
+        for doc in docs:
+
+            # Add result to list
+            results.append({
+                "content": doc.page_content,
+                # "category_name": doc_category,
+                "link": doc.metadata.get('productURL')
+            })
+
+    else:
+        broad_query = vectorStore.similarity_search(positive_search, k=10)
+        doc_indices = [doc.metadata.get("index") for doc in broad_query]
+
+        exclude_query = vectorStore.similarity_search(
+            negated_clause,
+            k=5,
+            pre_filter={"index":{"$in":doc_indices}}
+        )
+
+        for doc in exclude_query:
+            print(doc.metadata.get('title'))
+
+        for doc in broad_query:
+            if (not (doc in exclude_query)):
+                results.append({
+                    "content": doc.page_content,
+                    "link": doc.metadata.get('productURL')
+                })
     
     return results
 
