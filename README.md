@@ -7,7 +7,7 @@ A project created during DiamondHacks, ACM@UCSD's hackathon! Made by May Hong, M
 ## Inspiration
 If you search up "not red shirt" on Amazon.com, you are presented with a bunch of red shirts. Traditional keyword search for e-commerce has its flaws. Particular syntax and an inability to handle certain aspects of natural language like negation impede the product finding process and hurt the user experience, while also encouraging keyword spam in product listings. 
 
-##What We Do
+## What We Do
 We built a search engine leverages semantic search through vector embeddings to understand the meaning behind a user's query—not just the keywords. Unlike traditional search engines that focus on literal word matching, our model captures context and intent. For example:
 * "Not red shirt" filters out red items altogether.
 * "Clothes to make me look ripped" prioritizes fitted and athletic clothing, not garments that are literally torn.
