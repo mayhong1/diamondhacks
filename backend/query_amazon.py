@@ -1,6 +1,8 @@
 import argparse
 import params
 import certifi
+import sys
+from google import genai
 from pymongo import MongoClient
 from langchain_mongodb import MongoDBAtlasVectorSearch
 from langchain_openai import OpenAIEmbeddings
@@ -28,6 +30,43 @@ if args.question is None:
 else:
     query = args.question
 
+# QUERY NEGATION PREPROCESSING
+client = genai.Client(api_key=params.gemini_key)
+
+is_negated = client.models.generate_content(
+    model="gemini-2.0-flash",
+    contents=[f"Does the query {query} contain a negation clause? Respond with yes or no only"]
+)
+
+if (is_negated.text.strip().casefold() == 'yes'.casefold()):
+    print("The phrase does have a negation")
+
+    negated_clause = client.models.generate_content(
+        model="gemini-2.0-flash",
+        contents=[f"Extract the negated adjective from the following sentence: ‘{query}’. Return only the negated adjective (not including the negation word)."]
+    )
+
+    print(f"The negated clause is {negated_clause.text}")
+
+    unnegated_search = client.models.generate_content(
+        model="gemini-2.0-flash",
+        contents=[f"Please analyze the following phrase and perform these transformations:\
+            1. Identify negation words: Find words like 'not,' 'un-,' 'in-,' 'non-,' 'without,' and similar terms.\
+            2. Identify negated adjectives: Determine which adjectives are being negated by the identified negation words.\
+            3. Remove negation words and negated adjectives: Delete both the negation words and the adjectives they negate.\
+            4. Preserve other adjectives: Leave any adjectives that are not being negated intact.\
+            5. Respond only with the transformed phrase\
+            Phrase: {query}\
+        "]
+    )
+
+    print(f"An unnegated version would be {unnegated_search.text}")
+else:
+    print("The phrase does not have a negation")
+
+sys.exit()
+
+
 print("\nYour search query:")
 print("----------------")
 print(query)
@@ -48,8 +87,11 @@ vectorStore = MongoDBAtlasVectorSearch(
 # Perform similarity search
 print("\nSearch Results:")
 print("--------------")
-docs = vectorStore.similarity_search(query, k=10)  # Get more results to allow for filtering
+docs = vectorStore.similarity_search(query, k=20)  # Get more results to allow for filtering
 
+print(len(docs))
+
+"""
 # Print each product with some formatting
 results_shown = 0
 for i, doc in enumerate(docs):
@@ -88,3 +130,4 @@ if results_shown == 0:
     print("No matching products found.")
 
 print("\nSearch complete!")
+"""
