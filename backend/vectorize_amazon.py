@@ -43,6 +43,7 @@ for _, row in df.iterrows():
         page_content=content,
         metadata={
             "title": row['title'],
+            "price": row['price'],
             "asin": row['asin'],
             "productURL": row['productURL'] if 'productURL' in row and not pd.isna(row['productURL']) else None,
             "source": "amazon_products"
