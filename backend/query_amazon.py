@@ -75,11 +75,12 @@ def search_amazon(query, category=None):
                 link = line.split("productURL:")[1].strip()
         
         # Generate Amazon product search link if no link found but title exists
-        if not link and title:
+       # if not link and title:
             # Format title for Amazon search URL
-            search_query = title.replace(" ", "+")
-            link = f"https://www.amazon.com/s?k={search_query}"
+           # search_query = title.replace(" ", "+")
+           # link = f"https://www.amazon.com/s?k={search_query}"
         
+        link = doc.metadata.get('productURL')
         # Add result to list
         results.append({
             "content": doc.page_content,
