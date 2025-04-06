@@ -18,7 +18,7 @@ Running backend:
 2. have flask dependencies installed (should be in requirements.txt)
 3. run "python app.py"
 
-Running backend:
+Running frontend:
 1. cd into frontend
 2. npm install
 3. npm run dev
