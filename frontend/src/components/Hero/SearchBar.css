@@ -12,6 +12,22 @@
   margin-bottom: 24px;
 }
 
+/* Subtle bounce animation */
+@keyframes bounce-subtle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.animate-bounce-subtle {
+  display: inline-block;
+  animation: bounce-subtle 2s ease-in-out infinite;
+}
+
 .search-box-container {
   width: 100%;
 }

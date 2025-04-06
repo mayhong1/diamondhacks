@@ -74,9 +74,11 @@ body {
 /* Navbar Styles */
 .navbar {
   width: 100%;
-  background-color: var(--background);
+  background-color: #ffffff;
   border-bottom: 1px solid var(--border-color);
   padding: 1rem 0;
+  position: relative;
+  z-index: 50;
 }
 
 .navbar-container {
@@ -93,7 +95,7 @@ body {
 }
 
 .navbar-logo {
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: 700;
   color: var(--foreground);
   text-decoration: none;
@@ -143,10 +145,11 @@ body {
 }
 
 .search-title {
-  font-size: 2.5rem;
+  font-size: 3.5rem;
   font-weight: 700;
   color: var(--foreground);
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  line-height: 1.2;
 }
 
 .search-box-container {

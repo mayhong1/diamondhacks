@@ -40,6 +40,8 @@ export default function SearchBar() {
     "Looking for a graduation gift",
     "What's a good anniversary gift?",
     "Need ideas for a housewarming present",
+    "I want to buy some not red shirts",
+    "Show me my dream watch",
   ];
 
   // Effect to cycle through placeholder texts with animation
@@ -203,7 +205,16 @@ export default function SearchBar() {
 
   return (
     <div className="search-container">
-      <h1 className="search-title">Let's find your next purchase.</h1>
+      <h1 className="search-title">
+        Let's find your{" "}
+        <span className="text-[#780000] animate-bounce-subtle">next</span>{" "}
+        purchase.
+      </h1>
+      <h2 className="text-center text-lg text-gray-600 mb-6 font-medium">
+        Search by <i>text</i>, <i>voice</i>, or <i>image</i> to find{" "}
+        <b>exactly what you want</b>, even without knowing exactly what you're
+        looking for!
+      </h2>
       <form onSubmit={handleSearch} className="search-box-container">
         <SearchInput
           searchQuery={searchState.query}
