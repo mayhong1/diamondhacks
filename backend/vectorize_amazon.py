@@ -18,6 +18,8 @@ print(f"Loaded {len(df)} products")
 # Step 2: Convert each product into a Document
 print("Converting products to documents...")
 docs = []
+index = 0
+
 for _, row in df.iterrows():
     # Combine product information into a text string
     content = f"Title: {row['title']}\n"
@@ -46,10 +48,12 @@ for _, row in df.iterrows():
             "price": row['price'],
             "asin": row['asin'],
             "productURL": row['productURL'] if 'productURL' in row and not pd.isna(row['productURL']) else None,
-            "source": "amazon_products"
+            "source": "amazon_products",
+            "index" : index
         }
     )
     docs.append(doc)
+    index += 1
 
 print(f"Created {len(docs)} document objects")
 

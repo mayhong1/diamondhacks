@@ -24,7 +24,7 @@ def search_amazon(query, category=None):
         category (int, optional): Category ID filter (104: Suitcases, 110: Men's Clothing)
         
     Returns:
-        list: List of search results with product information and category
+        list: List of search results with product information, category, and link
     """
     # Initialize MongoDB python client
     client = MongoClient(params.mongodb_conn_string)
@@ -56,20 +56,35 @@ def search_amazon(query, category=None):
         
         # Extract category name if present
         doc_category = None
-        if "Category ID: " in doc.page_content:
-            for line in doc.page_content.split('\n'):
-                if "Category ID: " in line:
-                    try:
-                        category_id = int(line.split("Category ID: ")[1].strip())
-                        if category_id in CATEGORIES:
-                            doc_category = CATEGORIES[category_id]
-                    except ValueError:
-                        pass
+        link = None
+        title = None
+        
+        # Extract info from content
+        content_lines = doc.page_content.split('\n')
+        for line in content_lines:
+            if "Category ID: " in line:
+                try:
+                    category_id = int(line.split("Category ID: ")[1].strip())
+                    if category_id in CATEGORIES:
+                        doc_category = CATEGORIES[category_id]
+                except ValueError:
+                    pass
+            elif "Title:" in line:
+                title = line.split("Title:")[1].strip()
+            elif "Link:" in line:
+                link = line.split("productURL:")[1].strip()
+        
+        # Generate Amazon product search link if no link found but title exists
+        if not link and title:
+            # Format title for Amazon search URL
+            search_query = title.replace(" ", "+")
+            link = f"https://www.amazon.com/s?k={search_query}"
         
         # Add result to list
         results.append({
             "content": doc.page_content,
-            "category_name": doc_category
+            "category_name": doc_category,
+            "link": link
         })
         
         results_shown += 1
@@ -116,6 +131,8 @@ if __name__ == "__main__":
             print(result["content"])
             if result["category_name"]:
                 print(f"Category: {result['category_name']}")
+            if result["link"]:
+                print(f"Link: {result['link']}")
             print("-" * 50)
     
     print("\nSearch complete!")
