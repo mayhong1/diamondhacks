@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import ProductCard from "./ProductCard";
 import "./SearchBar.css";
 
 const SearchResults = ({ results }) => {
@@ -9,33 +8,22 @@ const SearchResults = ({ results }) => {
     <div className="search-results">
       <h2 className="results-title">Search Results</h2>
       <div className="results-list">
-        {results.map((result, index) => (
-          <div key={index} className="result-item">
-            <div className="result-content">
-              {result.content.split("\n").map((line, lineIndex) => (
-                <div
-                  key={lineIndex}
-                  className={
-                    line.startsWith("Title:")
-                      ? "result-title"
-                      : line.startsWith("Price:")
-                      ? "result-price"
-                      : line.startsWith("Rating:")
-                      ? "result-rating"
-                      : "result-detail"
-                  }
-                >
-                  {line}
-                </div>
-              ))}
-            </div>
-            {result.category_name && (
-              <div className="result-category">
-                Category: {result.category_name}
-              </div>
-            )}
-            {result.link && (
-              <div className="result-link">
+        {results.map((result, index) => {
+          // Extract data from the content string
+          const titleMatch = result.content.match(/Title: (.*?)(?:\n|$)/);
+          const priceMatch = result.content.match(/Price: (.*?)(?:\n|$)/);
+          const ratingMatch = result.content.match(/Rating: (.*?)(?:\n|$)/);
+
+          const title = titleMatch ? titleMatch[1] : "Product";
+          const price = priceMatch ? priceMatch[1] : "Price not available";
+          const rating = ratingMatch ? ratingMatch[1] : null;
+
+          return (
+            <div key={index} className="result-card">
+              <h3 className="result-title">{title}</h3>
+              <div className="result-price">{price}</div>
+              {rating && <div className="result-rating">{rating}</div>}
+              {result.link && (
                 <a
                   href={result.link}
                   target="_blank"
@@ -44,10 +32,10 @@ const SearchResults = ({ results }) => {
                 >
                   View Product
                 </a>
-              </div>
-            )}
-          </div>
-        ))}
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
