@@ -1,5 +1,6 @@
 import argparse
 import params
+import certifi
 from pymongo import MongoClient
 from langchain_mongodb import MongoDBAtlasVectorSearch
 from langchain_openai import OpenAIEmbeddings
@@ -35,7 +36,7 @@ if args.category:
     print(f"Filtering by category: {CATEGORIES[args.category]}")
 
 # Initialize MongoDB python client
-client = MongoClient(params.mongodb_conn_string)
+client = MongoClient(params.mongodb_conn_string, tlsCAFile=certifi.where())
 collection = client[params.db_name][params.collection_name]
 
 # initialize vector store
