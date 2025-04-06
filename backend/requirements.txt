@@ -1,7 +1,3 @@
-# Core Python packages
-argparse
-warnings
-
 # MongoDB and related
 pymongo
 langchain-mongodb
@@ -17,18 +13,10 @@ werkzeug
 
 # Data handling
 pandas
-csv
-re
 
 # Google Generative AI
 google-generativeai
 Pillow  # For PIL.Image
-
-# Additional
-logging
-io
-os
-time
 
 # Custom/local modules (not installable via pip)
 # These will need to be available locally
