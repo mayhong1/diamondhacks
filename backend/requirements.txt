@@ -1,12 +1,6 @@
-argparse
-langchain>=0.0.231
-langchain-mongodb>=0.6.0
-langchain-openai>=0.3.0
-langchain-core>=0.3.0
-lxml
+flask
+flask-cors
 pymongo
-requests
-bs4
-openai
-tiktoken
-pandas
+langchain-mongodb
+langchain-openai
+langchain-core

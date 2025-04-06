@@ -15,75 +15,107 @@ CATEGORIES = {
     110: "Men's Clothing"
 }
 
-# Process arguments
-parser = argparse.ArgumentParser(description='Amazon Product Search Demo')
-parser.add_argument('-q', '--question', help="The search query for Amazon products")
-parser.add_argument('-c', '--category', type=int, choices=[104, 110], help="Filter by category ID (104: Suitcases, 110: Men's Clothing)")
-args = parser.parse_args()
-
-if args.question is None:
-    # Some queries to try...
-    query = "luggage wheels"
-else:
-    query = args.question
-
-print("\nYour search query:")
-print("----------------")
-print(query)
-
-if args.category:
-    print(f"Filtering by category: {CATEGORIES[args.category]}")
-
-# Initialize MongoDB python client
-client = MongoClient(params.mongodb_conn_string)
-collection = client[params.db_name][params.collection_name]
-
-# initialize vector store
-embeddings = OpenAIEmbeddings(openai_api_key=params.openai_api_key)
-vectorStore = MongoDBAtlasVectorSearch(
-    collection, embeddings, index_name=params.index_name
-)
-
-# Perform similarity search
-print("\nSearch Results:")
-print("--------------")
-docs = vectorStore.similarity_search(query, k=10)  # Get more results to allow for filtering
-
-# Print each product with some formatting
-results_shown = 0
-for i, doc in enumerate(docs):
-    # If category filter is applied, check that the document matches in the text content
-    if args.category:
-        category_found = False
-        category_str = f"Category ID: {args.category}"
-        if category_str in doc.page_content:
-            category_found = True
+def search_amazon(query, category=None):
+    """
+    Search for Amazon products based on query and optional category filter.
+    
+    Args:
+        query (str): Search query for Amazon products
+        category (int, optional): Category ID filter (104: Suitcases, 110: Men's Clothing)
         
-        if not category_found:
-            continue
-    
-    results_shown += 1
-    print(f"\nResult #{results_shown}:")
-    print(doc.page_content)
-    
-    # Print category name if we can extract it
-    if "Category ID: " in doc.page_content:
-        for line in doc.page_content.split('\n'):
-            if "Category ID: " in line:
-                try:
-                    category_id = int(line.split("Category ID: ")[1].strip())
-                    if category_id in CATEGORIES:
-                        print(f"Category: {CATEGORIES[category_id]}")
-                except ValueError:
-                    pass
-    
-    print("-" * 50)
-    
-    # Stop after showing 5 results
-    if results_shown >= 5:
-        break
+    Returns:
+        list: List of search results with product information and category
+    """
+    # Initialize MongoDB python client
+    client = MongoClient(params.mongodb_conn_string)
+    collection = client[params.db_name][params.collection_name]
 
-if results_shown == 0:
-    print("No matching products found.")
+    # initialize vector store
+    embeddings = OpenAIEmbeddings(openai_api_key=params.openai_api_key)
+    vectorStore = MongoDBAtlasVectorSearch(
+        collection, embeddings, index_name=params.index_name
+    )
 
-print("\nSearch complete!")
+    # Perform similarity search
+    docs = vectorStore.similarity_search(query, k=10)  # Get more results to allow for filtering
+
+    # Process search results
+    results = []
+    results_shown = 0
+    
+    for i, doc in enumerate(docs):
+        # If category filter is applied, check that the document matches in the text content
+        if category:
+            category_found = False
+            category_str = f"Category ID: {category}"
+            if category_str in doc.page_content:
+                category_found = True
+            
+            if not category_found:
+                continue
+        
+        # Extract category name if present
+        doc_category = None
+        if "Category ID: " in doc.page_content:
+            for line in doc.page_content.split('\n'):
+                if "Category ID: " in line:
+                    try:
+                        category_id = int(line.split("Category ID: ")[1].strip())
+                        if category_id in CATEGORIES:
+                            doc_category = CATEGORIES[category_id]
+                    except ValueError:
+                        pass
+        
+        # Add result to list
+        results.append({
+            "content": doc.page_content,
+            "category_name": doc_category
+        })
+        
+        results_shown += 1
+        
+        # Stop after collecting 5 results
+        if results_shown >= 5:
+            break
+    
+    return results
+
+# This allows the file to be both imported and run directly
+if __name__ == "__main__":
+    # Process arguments
+    parser = argparse.ArgumentParser(description='Amazon Product Search Demo')
+    parser.add_argument('-q', '--question', help="The search query for Amazon products")
+    parser.add_argument('-c', '--category', type=int, choices=[104, 110], help="Filter by category ID (104: Suitcases, 110: Men's Clothing)")
+    args = parser.parse_args()
+
+    if args.question is None:
+        # Some queries to try...
+        query = "luggage wheels"
+    else:
+        query = args.question
+
+    print("\nYour search query:")
+    print("----------------")
+    print(query)
+
+    if args.category:
+        print(f"Filtering by category: {CATEGORIES[args.category]}")
+    
+    # Call the search function
+    results = search_amazon(query, args.category)
+
+    # Print results
+    print("\nSearch Results:")
+    print("--------------")
+    
+    if not results:
+        print("No matching products found.")
+    else:
+        for i, result in enumerate(results, 1):
+            print(f"\nResult #{i}:")
+            print(result["content"])
+            if result["category_name"]:
+                print(f"Category: {result['category_name']}")
+            print("-" * 50)
+    
+    print("\nSearch complete!")
