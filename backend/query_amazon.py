@@ -25,30 +25,35 @@ parser.add_argument('-c', '--category', type=int, choices=[104, 110], help="Filt
 args = parser.parse_args()
 
 if args.question is None:
-    # Some queries to try...
-    query = "luggage wheels"
+    print("Please input a question")
+    sys.exit()
 else:
-    query = args.question
+    search = args.question
 
 # QUERY NEGATION PREPROCESSING
+is_negated = False
+negated_clause = ""
+positive_search = ""
+
 client = genai.Client(api_key=params.gemini_key)
 
-is_negated = client.models.generate_content(
+is_negated_query = client.models.generate_content(
     model="gemini-2.0-flash",
-    contents=[f"Does the query {query} contain a negation clause? Respond with yes or no only"]
+    contents=[f"In the following phrase, Identify negation words: Find words \
+        like 'not,' 'un-,' 'in-,' 'non-,' 'without,' and similar terms. If \
+        there are any, respond yes. Otherwise, respond no.\
+        Phrase: {search}"]
 )
+is_negated = (is_negated_query.text.strip().casefold() == 'yes'.casefold())
 
-if (is_negated.text.strip().casefold() == 'yes'.casefold()):
-    print("The phrase does have a negation")
-
-    negated_clause = client.models.generate_content(
+if (is_negated):
+    negated_clause_query = client.models.generate_content(
         model="gemini-2.0-flash",
-        contents=[f"Extract the negated adjective from the following sentence: ‘{query}’. Return only the negated adjective (not including the negation word)."]
+        contents=[f"Extract the negated adjective from the following sentence: ‘{search}’. Return only the negated adjective (not including the negation word)."]
     )
+    negated_clause = negated_clause_query.text
 
-    print(f"The negated clause is {negated_clause.text}")
-
-    unnegated_search = client.models.generate_content(
+    positive_search_query = client.models.generate_content(
         model="gemini-2.0-flash",
         contents=[f"Please analyze the following phrase and perform these transformations:\
             1. Identify negation words: Find words like 'not,' 'un-,' 'in-,' 'non-,' 'without,' and similar terms.\
@@ -56,20 +61,15 @@ if (is_negated.text.strip().casefold() == 'yes'.casefold()):
             3. Remove negation words and negated adjectives: Delete both the negation words and the adjectives they negate.\
             4. Preserve other adjectives: Leave any adjectives that are not being negated intact.\
             5. Respond only with the transformed phrase\
-            Phrase: {query}\
+            Phrase: {search}\
         "]
     )
+    positive_search = positive_search_query.text
 
-    print(f"An unnegated version would be {unnegated_search.text}")
-else:
-    print("The phrase does not have a negation")
-
-sys.exit()
-
-
-print("\nYour search query:")
-print("----------------")
-print(query)
+print(f"Original search: {search}")
+print(f"is_negated: {is_negated}")
+print(f"negated_clause: {negated_clause}")
+print(f"positive_search: {positive_search}")
 
 if args.category:
     print(f"Filtering by category: {CATEGORIES[args.category]}")
@@ -87,47 +87,33 @@ vectorStore = MongoDBAtlasVectorSearch(
 # Perform similarity search
 print("\nSearch Results:")
 print("--------------")
-docs = vectorStore.similarity_search(query, k=20)  # Get more results to allow for filtering
 
-print(len(docs))
+if (not is_negated):
+    docs = vectorStore.similarity_search(search, k=5)
 
-"""
-# Print each product with some formatting
-results_shown = 0
-for i, doc in enumerate(docs):
-    # If category filter is applied, check that the document matches in the text content
-    if args.category:
-        category_found = False
-        category_str = f"Category ID: {args.category}"
-        if category_str in doc.page_content:
-            category_found = True
-        
-        if not category_found:
-            continue
+    for i, doc in enumerate(docs):
+        print(f'Result #{i}')
+        print(doc.page_content)
+else:
     
-    results_shown += 1
-    print(f"\nResult #{results_shown}:")
-    print(doc.page_content)
-    
-    # Print category name if we can extract it
-    if "Category ID: " in doc.page_content:
-        for line in doc.page_content.split('\n'):
-            if "Category ID: " in line:
-                try:
-                    category_id = int(line.split("Category ID: ")[1].strip())
-                    if category_id in CATEGORIES:
-                        print(f"Category: {CATEGORIES[category_id]}")
-                except ValueError:
-                    pass
-    
-    print("-" * 50)
-    
-    # Stop after showing 5 results
-    if results_shown >= 5:
-        break
+    broad_query = vectorStore.similarity_search(positive_search, k=10)
 
-if results_shown == 0:
-    print("No matching products found.")
+    doc_indices = [doc.metadata.get("index") for doc in broad_query]
 
-print("\nSearch complete!")
-"""
+    exclude_query = vectorStore.similarity_search(
+        negated_clause,
+        k=5,
+        pre_filter={"index":{"$in":doc_indices}}
+    )
+
+    result_num = 1
+    for doc in broad_query:
+        if (not (doc in exclude_query)):
+            print(f"Result #{result_num}")
+            print(doc.page_content)
+            result_num += 1
+    
+    print("")
+    print("EXCLUDED RESULTS --------------------------------------------------------------------------------------------")
+    for doc in exclude_query:
+        print(doc.page_content)
